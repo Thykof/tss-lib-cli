@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  build:
+    cmds:
+      - go build -o bin/tss-lib-cli cmd/tss-lib-cli/main.go 
+
+  run:
+    cmds:
+      - go run cmd/tss-lib-cli/main.go {{.CLI_ARGS}}
