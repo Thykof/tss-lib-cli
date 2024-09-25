@@ -73,7 +73,6 @@ func Generate(n int, threshold int) error {
 					fmt.Printf("failed serializing output: %v", err)
 				}
 
-				fmt.Printf("Save data: %v\n", out)
 				fmt.Printf("public key: %v\n", save.P)
 
 				// dump to a file

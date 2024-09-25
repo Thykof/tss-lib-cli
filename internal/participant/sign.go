@@ -53,10 +53,12 @@ func Sign(n int, threshold int, msg string) error {
 		return fmt.Errorf("expected %d keys, got %d", n, len(keys))
 	}
 
-	parties := utils.GetParticipantPartyIDs(n)
+	numberOfSigners := threshold + 1
+
+	parties := utils.GetParticipantPartyIDs(numberOfSigners)
 	ctx := tss.NewPeerContext(parties)
 	curve := tss.S256()
-	participants := make([]*Participant, n)
+	participants := make([]*Participant, numberOfSigners)
 
 	payload := prepareMessage(msg)
 
@@ -87,7 +89,9 @@ func Sign(n int, threshold int, msg string) error {
 		}
 	}
 
-	for _, p := range participants {
+	for i := 0; i < numberOfSigners; i++ {
+		p := participants[i]
+		fmt.Printf("Starting participant %s\n", p.ID.KeyInt().String())
 		// Start message handling for each participant
 		go p.handleMsg(participants)
 		// Listen for incoming messages
