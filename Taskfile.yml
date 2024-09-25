@@ -16,3 +16,8 @@ tasks:
   fmt:
     cmds:
       - go fmt ./...
+
+  clean:
+    cmds:
+      - rm -rf sig-*.json
+      - rm -rf keygen-*.json
