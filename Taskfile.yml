@@ -1,6 +1,10 @@
 version: '3'
 
 tasks:
+  install: 
+    cmds:
+      - go mod tidy
+
   build:
     cmds:
       - go build -o bin/tss-lib-cli cmd/tss-lib-cli/main.go 
@@ -8,3 +12,7 @@ tasks:
   run:
     cmds:
       - go run cmd/tss-lib-cli/main.go {{.CLI_ARGS}}
+
+  fmt:
+    cmds:
+      - go fmt ./...

@@ -54,11 +54,30 @@ func main() {
 						return err
 					}
 
-					isOk, err := verifier.Verify(msg)
+					return nil
+				},
+			},
+			{
+				Name:    "verify",
+				Aliases: []string{"v"},
+				Usage:   "verify the signature",
+				Action: func(cCtx *cli.Context) error {
+					n, err := strconv.Atoi(cCtx.Args().First())
 					if err != nil {
 						return err
 					}
-					
+					t, err := strconv.Atoi(cCtx.Args().Get(1))
+					if err != nil {
+						return err
+					}
+
+					msg := cCtx.Args().Get(2)
+
+					isOk, err := verifier.Verify(n, t, msg)
+					if err != nil {
+						return err
+					}
+
 					if isOk {
 						fmt.Println("Signature is valid")
 					} else {
