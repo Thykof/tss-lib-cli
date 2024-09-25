@@ -12,19 +12,15 @@ import (
 	"github.com/bnb-chain/tss-lib/v2/common"
 )
 
-func LoadSig(numberOfSigners int) ([]*common.SignatureData, [][]byte, error) {
+func LoadSig() ([]*common.SignatureData, [][]byte, error) {
 	// list all file starting with keygen-
 	files, err := utils.ListFilesWithPrefix(".", "sig-")
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to list files: %w", err)
 	}
 
-	if len(files) != numberOfSigners {
-		return nil, nil, fmt.Errorf("expected %d signatures, got %d", numberOfSigners, len(files))
-	}
-
-	signatures := make([]*common.SignatureData, numberOfSigners)
-	contents := make([][]byte, numberOfSigners)
+	signatures := make([]*common.SignatureData, len(files))
+	contents := make([][]byte, len(files))
 
 	for idx, file := range files {
 		// unmarshal the file
@@ -45,28 +41,25 @@ func LoadSig(numberOfSigners int) ([]*common.SignatureData, [][]byte, error) {
 	return signatures, contents, nil
 }
 
-func Verify(n int, threshold int, msg string) (bool, error) {
-	numberOfSigners := threshold + 1
-
+func Verify(msg string) (bool, error) {
 	fmt.Printf("verifying message %s\n", msg)
-	signatures, contents, err := LoadSig(numberOfSigners)
+	signatures, contents, err := LoadSig()
 	if err != nil {
 		return false, fmt.Errorf("failed to load signatures: %w", err)
 	}
 
-	// Assert the number of files is equal to the number of participants
-	if len(signatures) != numberOfSigners {
-		return false, fmt.Errorf("expected %d signatures, got %d", numberOfSigners, len(signatures))
+	if len(signatures) == 0 {
+		return false, fmt.Errorf("no signature found")
 	}
 
 	// Assert the file content are all the same
-	for i := 1; i < numberOfSigners; i++ {
+	for i := 1; i < len(contents); i++ {
 		if string(contents[i]) != string(contents[0]) {
 			return false, fmt.Errorf("file content mismatch")
 		}
 	}
 
-	keys, err := participant.LoadKeys(n)
+	keys, err := participant.LoadKeys()
 	if err != nil {
 		return false, fmt.Errorf("failed to load keys: %w", err)
 	}

@@ -14,14 +14,19 @@ import (
 	"github.com/bnb-chain/tss-lib/v2/tss"
 )
 
-func LoadKeys(n int) ([]*keygen.LocalPartySaveData, error) {
+// LoadKeys loads the keys from the files, return at least one key, or an error
+func LoadKeys() ([]*keygen.LocalPartySaveData, error) {
 	// list all file starting with keygen-
 	files, err := utils.ListFilesWithPrefix(".", "keygen-")
 	if err != nil {
 		return nil, fmt.Errorf("failed to list files: %w", err)
 	}
 
-	keys := make([]*keygen.LocalPartySaveData, n)
+	if len(files) == 0 {
+		return nil, fmt.Errorf("no key files found")
+	}
+
+	keys := make([]*keygen.LocalPartySaveData, len(files))
 
 	for idx, file := range files {
 		// unmarshal the file
@@ -44,16 +49,20 @@ func LoadKeys(n int) ([]*keygen.LocalPartySaveData, error) {
 func Sign(n int, threshold int, msg string) error {
 	fmt.Printf("signing message %s\n", msg)
 
-	keys, err := LoadKeys(n)
+	keys, err := LoadKeys()
 	if err != nil {
 		return fmt.Errorf("failed to load keys: %w", err)
 	}
 
-	if len(keys) != n {
-		return fmt.Errorf("expected %d keys, got %d", n, len(keys))
+	numberOfSigners := threshold + 1
+
+	if len(keys) < numberOfSigners {
+		return fmt.Errorf("expected at least %d keys, got %d", numberOfSigners, len(keys))
 	}
 
-	numberOfSigners := threshold + 1
+	if threshold >= n {
+		return fmt.Errorf("threshold must be less than n")
+	}
 
 	parties := utils.GetParticipantPartyIDs(numberOfSigners)
 	ctx := tss.NewPeerContext(parties)
@@ -105,6 +114,7 @@ func Sign(n int, threshold int, msg string) error {
 		go func(p *Participant) {
 			for err := range p.ErrCh {
 				fmt.Printf("Error: %s", err)
+				panic(err)
 			}
 		}(p)
 		go func(p *Participant) {

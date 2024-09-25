@@ -14,6 +14,19 @@ The key generation process will create `keygen-x.json files`. Those files includ
 
 The signing process will create `sig-x.json` files that will have the same signature
 
+# Documentation
+
+    tss-lib-cli generate [n] [t]
+    tss-lib-cli sign [n] [t] [message]
+    tss-lib-cli verify [message]
+
+- You can invoke the sign command with `t` above the value used to generate, because you can involve more party than the minimum required.
+- `t` must be strictly lower than `n`, because we need at least `t+1` signers.
+- You can invoke the sign command with `n` lower than the one you used to generate, as long as you respect the previous condition.
+- The verify command needs at least one valid signature file to be present, because in the context of distributed signature, each participant creates one signature file.
+  - In this demonstration CLI, we end up with `t+1` signature files because all signers run in the same computer.
+  - In the same logic, it needs only one key file because each key file contains the common ECDSA public key.
+
 # Dev
 
 ## Setup
@@ -24,7 +37,11 @@ The signing process will create `sig-x.json` files that will have the same signa
 
     task run -- generate 4 2
     task run -- sign 4 2 hello
-    task run -- verify 4 2 hello
+    task run -- verify hello
+
+## Format
+
+    task fmt
 
 # Build
 
@@ -34,13 +51,8 @@ The signing process will create `sig-x.json` files that will have the same signa
 
     ./bin/tss-lib-cli generate 4 2
 
-# Format
-
-    task fmt
-
-# Assumptions
-
-We assume that all participants are involved in the signature.
+# Remarks about tss-lib
 
 The tss-lib...
-- calculate the ECDSA public key, so we don't have to do it again, it's available in the data given at the end of the generation process
+- calculates the ECDSA public key, so we don't have to do it again, it's available in the data given at the end of the generation process.
+- calculates the final signature, ready to be verified, and all participants have it, this is why the CLI creates identical `t+1` signature files.

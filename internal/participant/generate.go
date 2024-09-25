@@ -62,6 +62,7 @@ func Generate(n int, threshold int) error {
 		go func(p *Participant) {
 			for err := range p.ErrCh {
 				fmt.Printf("Error: %s", err)
+				panic(err)
 			}
 		}(p)
 		go func(p *Participant) {
