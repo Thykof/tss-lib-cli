@@ -1,2 +1,4 @@
-bin/
+bin/*
+!bin/.gitkeep
 keygen-*.json
+sig-*.json

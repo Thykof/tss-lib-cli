@@ -1,11 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
 
-	"github.com/Thykof/tss-lib-cli/internal/generate"
+	"github.com/Thykof/tss-lib-cli/internal/participant"
+	"github.com/Thykof/tss-lib-cli/internal/verifier"
 	"github.com/urfave/cli/v2"
 )
 
@@ -15,7 +17,7 @@ func main() {
 		Usage: "CLI tool for tss-lib",
 		Commands: []*cli.Command{
 			{
-				Name:	"generate",
+				Name:    "generate",
 				Aliases: []string{"g"},
 				Usage:   "generate a new key pair",
 				Action: func(cCtx *cli.Context) error {
@@ -27,8 +29,43 @@ func main() {
 					if err != nil {
 						return err
 					}
-					err = generate.Generate(n, t)
+					err = participant.Generate(n, t)
 					return err
+				},
+			},
+			{
+				Name:    "sign",
+				Aliases: []string{"s"},
+				Usage:   "sign a message",
+				Action: func(cCtx *cli.Context) error {
+					n, err := strconv.Atoi(cCtx.Args().First())
+					if err != nil {
+						return err
+					}
+					t, err := strconv.Atoi(cCtx.Args().Get(1))
+					if err != nil {
+						return err
+					}
+
+					msg := cCtx.Args().Get(2)
+
+					err = participant.Sign(n, t, msg)
+					if err != nil {
+						return err
+					}
+
+					isOk, err := verifier.Verify(msg)
+					if err != nil {
+						return err
+					}
+					
+					if isOk {
+						fmt.Println("Signature is valid")
+					} else {
+						fmt.Println("Signature is invalid")
+					}
+
+					return nil
 				},
 			},
 		},
